@@ -1,0 +1,28 @@
+{
+    "Grosvenor Hotel": {
+        "2025-14-01": {
+            "prices": {
+                "Booking.com": "100 USD",
+                "Expedia": "105 USD",
+                "Hotels.com": "110 USD"
+            },
+            "screenshot": "app/screenshots/Grosvenor Hotel_2025-14-01.png"
+        },
+        "2025-15-02": {
+            "prices": {
+                "Booking.com": "100 USD",
+                "Expedia": "105 USD",
+                "Hotels.com": "110 USD"
+            },
+            "screenshot": "app/screenshots/Grosvenor Hotel_2025-15-02.png"
+        },
+        "2025-16-03": {
+            "prices": {
+                "Booking.com": "100 USD",
+                "Expedia": "105 USD",
+                "Hotels.com": "110 USD"
+            },
+            "screenshot": "app/screenshots/Grosvenor Hotel_2025-16-03.png"
+        }
+    }
+}
