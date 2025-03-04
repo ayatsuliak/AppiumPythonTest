@@ -1,64 +1,119 @@
 import base64
+import os
+import time
+import json
+from datetime import datetime, timedelta
 
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
-import time
-import json
-import os
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from config import APPIUM_SERVER, APPIUM_CAPS, RESULTS_FILE, SCREENSHOT_DIR
 
 
 def setup_driver():
-    """Запускає WebDriver для керування додатком."""
     options = UiAutomator2Options()
     options.load_capabilities(APPIUM_CAPS)
     return webdriver.Remote(APPIUM_SERVER, options=options)
 
 
 def search_hotel(driver, hotel_name):
-    """Шукає готель у Tripadvisor."""
-    time.sleep(25)
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "com.tripadvisor.tripadvisor:id/tab_search"))).click()
 
-    search_button = driver.find_element(AppiumBy.ID, "com.tripadvisor.tripadvisor:id/tab_search")
-    search_button.click()
-    time.sleep(5)
-
-    search_input = driver.find_element(AppiumBy.ID, "com.tripadvisor.tripadvisor:id/edtSearchString")
+    search_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "com.tripadvisor.tripadvisor:id/edtSearchString")))
     search_input.send_keys(hotel_name)
-    time.sleep(5)
 
-    first_result = driver.find_element(AppiumBy.XPATH,
-                                       '//android.widget.TextView[@resource-id="com.tripadvisor.tripadvisor:id/txtHeading" and contains(@text, "{}")]'.format(hotel_name))
+    first_result = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, f'//android.widget.TextView[@resource-id="com.tripadvisor.tripadvisor:id/txtHeading" and contains(@text, "{hotel_name}")]'))
+    )
     first_result.click()
-    time.sleep(5)
+    time.sleep(3)
 
 
-def get_prices(driver, hotel_name, dates):
-    """Отримує ціни готелю з різних джерел і робить скріншот."""
-    results = {hotel_name: {}}
+def select_dates(driver, check_in_date):
+    try:
+        date_field = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//android.view.ViewGroup[@resource-id='com.tripadvisor.tripadvisor:id/hotelInfoInputField']"))
+        )
+        date_field.click()
 
-    for date in dates:
-        time.sleep(3)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//android.view.ViewGroup[@resource-id='com.tripadvisor.tripadvisor:id/monthView']"))
+        )
 
-        screenshotBase64 = driver.get_screenshot_as_base64()
+        while True:
+            try:
+                driver.find_element(AppiumBy.XPATH,
+                                    f"//android.widget.TextView[@resource-id='com.tripadvisor.tripadvisor:id/txtTitle' and contains(@text, '{check_in_date.strftime('%B')}')]")
+                break
+            except:
+                next_month_button = driver.find_element(AppiumBy.XPATH, "//android.widget.Button[contains(@resource-id, 'btnNext')]")
+                next_month_button.click()
+                time.sleep(1)
 
-        screenshot_path = os.path.join(SCREENSHOT_DIR, f"{hotel_name}_{date}.png")
-        with open(screenshot_path, 'wb') as file:
-            file.write(base64.b64decode(screenshotBase64))
+        check_in_element = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        f"//android.widget.TextView[@resource-id='com.tripadvisor.tripadvisor:id/txtDay' and @text='{check_in_date.day}']"))
+        )
+        check_in_element.click()
 
-        providers = ["Booking.com", "Expedia", "Hotels.com"]
-        prices = {provider: f"{100 + i * 5} USD" for i, provider in enumerate(providers)}
+        check_out_date = check_in_date + timedelta(days=1)
+        check_out_element = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        f"//android.widget.TextView[@resource-id='com.tripadvisor.tripadvisor:id/txtDay' and @text='{check_out_date.day}']"))
+        )
+        check_out_element.click()
 
-        results[hotel_name][date] = {
-            "prices": prices,
-            "screenshot": screenshot_path
-        }
+        apply_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//android.widget.Button[@resource-id='com.tripadvisor.tripadvisor:id/btnPrimary']"))
+        )
+        apply_button.click()
+        time.sleep(5)
 
-    return results
+    except Exception as e:
+        print(f"❌ Error when selecting a date: {e}")
+
+
+def get_prices(driver, hotel_name, check_in_date):
+    screenshot_path = os.path.join("app/screenshots/", f"{hotel_name}_{check_in_date.strftime('%Y-%m-%d')}.png")
+
+    screenshotBase64 = driver.get_screenshot_as_base64()
+    with open(screenshot_path, 'wb') as file:
+        file.write(base64.b64decode(screenshotBase64))
+
+    prices = {}
+
+    try:
+        providers = driver.find_elements(AppiumBy.XPATH, "//android.widget.ImageView[@resource-id='com.tripadvisor.tripadvisor:id/imgProviderLogo']")
+
+        prices_elements = driver.find_elements(AppiumBy.XPATH,
+                                               "//android.widget.TextView[@resource-id='com.tripadvisor.tripadvisor:id/txtPrice']")
+
+        if not providers or not prices_elements:
+            print("⚠ No providers or prices found!")
+
+        for provider, price in zip(providers, prices_elements):
+            provider_name = provider.get_attribute("content-desc").strip()
+
+            if not provider_name:
+                provider_name = "Unknown Provider"
+
+            price_value = price.text.strip()
+            prices[provider_name] = price_value
+
+    except Exception as e:
+        print(f"❌ Unable to get prices: {e}")
+
+    return {
+        "prices": prices,
+        "screenshot": screenshot_path
+    }
 
 
 def save_results_to_json(results):
+    """Зберігає результати у JSON."""
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
     with open(RESULTS_FILE, "w") as file:
         json.dump(results, file, indent=4)
@@ -69,10 +124,17 @@ def main():
 
     try:
         hotel_name = "Grosvenor Hotel"
-        dates = ["2025-14-01", "2025-15-02", "2025-16-03"]
+        dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
+                 datetime(2025, 3, 19), datetime(2025, 3, 22),
+                 datetime(2025, 3, 29)]
 
         search_hotel(driver, hotel_name)
-        results = get_prices(driver, hotel_name, dates)
+
+        results = {}
+        for check_in_date in dates:
+            select_dates(driver, check_in_date)
+            results[check_in_date.strftime("%Y-%m-%d")] = get_prices(driver, hotel_name, check_in_date)
+
         save_results_to_json(results)
 
         print("✅ The test is over! The results are saved in", RESULTS_FILE)
