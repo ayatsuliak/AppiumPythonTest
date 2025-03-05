@@ -1,8 +1,8 @@
 from datetime import datetime
-from appium_helpers import setup_driver, search_hotel, select_dates, get_prices, save_results_to_json
-from config import RESULTS_FILE
-from database import save_results
-from redis_cache import cache_results
+from app.appium_helpers import setup_driver, search_hotel, select_dates, get_prices, save_results_to_json
+from app.config import RESULTS_FILE
+from app.database import save_results
+from app.redis_cache import cache_results
 
 
 def main():
@@ -10,9 +10,11 @@ def main():
 
     try:
         hotel_name = "Grosvenor Hotel"
-        dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
-                 datetime(2025, 3, 19), datetime(2025, 3, 22),
-                 datetime(2025, 3, 29)]
+        # dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
+        #          datetime(2025, 3, 19), datetime(2025, 3, 22),
+        #          datetime(2025, 3, 29)]
+
+        dates = [datetime(2025, 3, 10)]
 
         search_hotel(driver, hotel_name)
 

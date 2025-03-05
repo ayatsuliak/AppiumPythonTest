@@ -8,7 +8,7 @@ from appium.options.android import UiAutomator2Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from config import APPIUM_SERVER, APPIUM_CAPS, SCREENSHOT_DIR, RESULTS_FILE
+from app.config import APPIUM_SERVER, APPIUM_CAPS, SCREENSHOT_DIR, RESULTS_FILE
 
 
 def setup_driver():

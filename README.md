@@ -95,7 +95,7 @@ python -c "from app.database import init_db; init_db()"
 ## **4️⃣ Run the API Server (`api/main.py`)**
 Start the **FastAPI** server to access test results.
 ```bash
-uvicorn app.api:app --reload
+uvicorn api.main:app --reload
 ```
 ### **🔹 API Endpoints:**
 | Method | Endpoint       | Description                 |
@@ -108,10 +108,18 @@ uvicorn app.api:app --reload
 
 ---
 
-## **5️⃣ Run Automated Tests (`app/test_runner.py`)**
+## **5️⃣ Run the Appium Server**
+Open **Command Prompt** and start the **Appium** Server.
+```bash
+appium
+```
+
+---
+
+## **6️⃣ Run Automated Tests (`app/test_runner.py`)**
 This script launches the **Tripadvisor app**, selects a hotel, picks dates, fetches prices, and stores results in **Redis & SQLite**.
 ```bash
-python app/test_runner.py
+python -m app.test_runner
 ```
 ✅ After execution, results will be available in:
 - **Redis (cached for 1 hour)**
@@ -120,24 +128,6 @@ python app/test_runner.py
 
 ---
 
-## **6️⃣ Run the Appium Server**
-Open **Command Prompt** and start the **Appium** Server.
-```bash
-appium
-```
-
----
-
-## **7️⃣ Retrieve Cached Results from Redis**
-If Redis is enabled, results are stored temporarily for fast retrieval.
-```bash
-redis-cli keys "results:*"
-redis-cli get "results:2025-03-16"
-```
-
----
-
----
 
 ## **❌Common Issues & Fixes**
 | Issue | Solution                                                                |
