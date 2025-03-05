@@ -1,3 +1,5 @@
+# Appium Configuration
+APPIUM_SERVER = "http://localhost:4723"
 APPIUM_CAPS = {
     "platformName": "Android",
     "deviceName": "emulator-5554",
@@ -7,7 +9,14 @@ APPIUM_CAPS = {
     "noReset": True
 }
 
-APPIUM_SERVER = "http://localhost:4723"
+# Redis Configuration
+REDIS_HOST = "localhost"
+REDIS_PORT = 6379
+REDIS_DB = 0
 
-RESULTS_FILE = "app/results.json"
+# SQLite Database
+DB_FILE = "results.db"
+
+# File Paths
+RESULTS_FILE = "results.json"
 SCREENSHOT_DIR = "app/screenshots/"

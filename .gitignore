@@ -4,6 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 
+.idea/
+
 *.log
 logs/
 debug.log
@@ -17,3 +19,7 @@ debug.log
 results.db
 *.sqlite3
 *.db-journal
+
+dump.rdb
+redis_data/
+*.rdb
