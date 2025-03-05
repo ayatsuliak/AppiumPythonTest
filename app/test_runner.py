@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from database import save_results
 from config import APPIUM_SERVER, APPIUM_CAPS, RESULTS_FILE, SCREENSHOT_DIR
 
 
@@ -45,11 +45,11 @@ def select_dates(driver, check_in_date):
 
         while True:
             try:
-                driver.find_element(AppiumBy.XPATH,
+                driver.find_element(By.XPATH,
                                     f"//android.widget.TextView[@resource-id='com.tripadvisor.tripadvisor:id/txtTitle' and contains(@text, '{check_in_date.strftime('%B')}')]")
                 break
             except:
-                next_month_button = driver.find_element(AppiumBy.XPATH, "//android.widget.Button[contains(@resource-id, 'btnNext')]")
+                next_month_button = driver.find_element(By.XPATH, "//android.widget.Button[contains(@resource-id, 'btnNext')]")
                 next_month_button.click()
                 time.sleep(1)
 
@@ -70,7 +70,7 @@ def select_dates(driver, check_in_date):
             EC.element_to_be_clickable((By.XPATH, "//android.widget.Button[@resource-id='com.tripadvisor.tripadvisor:id/btnPrimary']"))
         )
         apply_button.click()
-        time.sleep(5)
+        time.sleep(10)
 
     except Exception as e:
         print(f"❌ Error when selecting a date: {e}")
@@ -86,9 +86,9 @@ def get_prices(driver, hotel_name, check_in_date):
     prices = {}
 
     try:
-        providers = driver.find_elements(AppiumBy.XPATH, "//android.widget.ImageView[@resource-id='com.tripadvisor.tripadvisor:id/imgProviderLogo']")
+        providers = driver.find_elements(By.XPATH, "//android.widget.ImageView[@resource-id='com.tripadvisor.tripadvisor:id/imgProviderLogo']")
 
-        prices_elements = driver.find_elements(AppiumBy.XPATH,
+        prices_elements = driver.find_elements(By.XPATH,
                                                "//android.widget.TextView[@resource-id='com.tripadvisor.tripadvisor:id/txtPrice']")
 
         if not providers or not prices_elements:
@@ -113,7 +113,6 @@ def get_prices(driver, hotel_name, check_in_date):
 
 
 def save_results_to_json(results):
-    """Зберігає результати у JSON."""
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
     with open(RESULTS_FILE, "w") as file:
         json.dump(results, file, indent=4)
@@ -124,9 +123,11 @@ def main():
 
     try:
         hotel_name = "Grosvenor Hotel"
-        dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
-                 datetime(2025, 3, 19), datetime(2025, 3, 22),
-                 datetime(2025, 3, 29)]
+        # dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
+        #          datetime(2025, 3, 19), datetime(2025, 3, 22),
+        #          datetime(2025, 3, 29)]
+
+        dates = [datetime(2025, 3, 16)]
 
         search_hotel(driver, hotel_name)
 
@@ -135,7 +136,8 @@ def main():
             select_dates(driver, check_in_date)
             results[check_in_date.strftime("%Y-%m-%d")] = get_prices(driver, hotel_name, check_in_date)
 
-        save_results_to_json(results)
+        #save_results_to_json(results)
+        save_results(results, hotel_name)
 
         print("✅ The test is over! The results are saved in", RESULTS_FILE)
 
