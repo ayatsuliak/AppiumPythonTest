@@ -10,21 +10,19 @@ def main():
 
     try:
         hotel_name = "Grosvenor Hotel"
-        # dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
-        #          datetime(2025, 3, 19), datetime(2025, 3, 22),
-        #          datetime(2025, 3, 29)]
-
-        dates = [datetime(2025, 3, 10)]
+        dates = [datetime(2025, 3, 14), datetime(2025, 3, 16),
+                 datetime(2025, 3, 19), datetime(2025, 3, 22),
+                 datetime(2025, 3, 29)]
 
         search_hotel(driver, hotel_name)
 
-        results = {}
+        results = {hotel_name: {}}
         for check_in_date in dates:
             select_dates(driver, check_in_date)
-            results[check_in_date.strftime("%Y-%m-%d")] = get_prices(driver, hotel_name, check_in_date)
+            results[hotel_name][check_in_date.strftime("%Y-%m-%d")] = get_prices(driver, hotel_name, check_in_date)
 
         cache_results(results)
-        save_results(results, hotel_name)
+        save_results(results)
         save_results_to_json(results)
 
         print("✅ The test is over! The results are saved in", RESULTS_FILE)

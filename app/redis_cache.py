@@ -8,8 +8,8 @@ redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, 
 
 def cache_results(results):
     """Stores results in Redis for 1 hour."""
-    for date, data in results.items():
-        key = f"results:{date}"
+    for hotel, data in results.items():
+        key = f"results:{hotel}"
         redis_client.setex(key, 3600, json.dumps(data))
 
 

@@ -14,10 +14,10 @@ AppiumPythonTest/
 │── app/
 │   ├── __init__.
 │   ├── appium_helpers.py     # Appium WebDriver setup and utilities
+│   │── config.py                 # Configuration settings
 │   ├── database.py           # SQLite database functions
 │   ├── redis_cache.py        # Redis caching functions
 │   ├── test_runner.py        # Runs the Appium tests
-│── config.py                 # Configuration settings
 │── README.md                 # Instructions
 │── requirements.txt          # Dependencies
 │── results.db                # SQLite database file
@@ -33,7 +33,7 @@ Before running the project, ensure that your **configuration settings** are corr
 
 ```python
 # Appium Configuration
-APPIUM_SERVER = "http://localhost:4723/wd/hub"
+APPIUM_SERVER = "http://localhost:4723"
 APPIUM_CAPS = {
     "platformName": "Android",
     "deviceName": "emulator-5554",
@@ -130,12 +130,12 @@ python -m app.test_runner
 
 
 ## **❌Common Issues & Fixes**
-| Issue | Solution                                                                |
-|-------|-------------------------------------------------------------------------|
-| Appium server not running | Start Appium manually: `appium --allow-cors`                               |
-| Redis connection error | Ensure Redis is running: `redis-server`                                 |
-| Database issues | Reinitialize: `python -c "from app.database import init_db; init_db()"` |
-| No test results found | Run tests again: `python app/test_runner.py`                            |
+| Issue | Solution                                                                                                                                |
+|-------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| Appium server not running | Start Appium manually: `appium --allow-cors`                                                                                            |
+| Redis connection error | Ensure Redis is running: `redis-server`                                                                                                 |
+| Database issues | Reinitialize: `python -c "from app.database import init_db; init_db()"`                                                                 |
+| No test results found | First, try opening the **Tripadvisor** app on the emulator, then completely closing it and run tests again: `python -m app.test_runner` |
 
 ---
 
@@ -144,5 +144,13 @@ python -m app.test_runner
 ✅ **Stores results in SQLite & Redis for caching**  
 ✅ **Provides a REST API to access test data**  
 ✅ **Uses FastAPI, Redis & Appium WebDriver**  
+✅ **`results.json` optional, used for quick viewing only**  
+✅ **`app/screenshots/` does not need to be pushed to GitHub, but is used to view the results**  
+
+
+## 🚨 **Note:**
+**When the testing on the emulator has already begun, you need to manually cancel all advertising inserts in the application **Tripadvisor****  
+
+---
 
 🚀 **Now you're ready to run automated tests & fetch results via API!**
